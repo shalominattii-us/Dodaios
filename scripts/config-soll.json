@@ -33,8 +33,8 @@
     "allow_sapi5_fallback": false
   },
   "brain": {
-    "primary": "openrouter",
-    "fallback": "openrouter",
+    "primary": "ollama",
+    "fallback": "local-openai",
     "deep_brain": "claude-cli",
     "routing_provider": "grok",
     "routing_model": "grok-4.20-0309-non-reasoning"
@@ -56,8 +56,8 @@
     "deep_model": "claude-opus-4-8"
   },
   "brain.worker": {
-    "provider": "claude-api",
-    "model": "",
+    "provider": "ollama",
+    "model": "qwen2.5:0.5b",
     "fallback_provider": "gemini",
     "fallback_model": "gemini-3.1-pro-preview",
     "fallback_provider_2": "gemini",
@@ -102,8 +102,8 @@
     "model": "z-ai/glm-5.2"
   },
   "brain.providers.gemini-live": {
-    "model": "gemini-3.1-flash-live-preview",
-    "voice": "Fenrir"
+    "model": "",
+    "voice": ""
   },
   "brain.providers.openai-realtime": {
     "model": "gpt-realtime-2.1-mini",
@@ -119,10 +119,10 @@
     "voice": "lux"
   },
   "brain.providers.ollama": {
-    "tool_model": "gemma4:12b-it-qat",
-    "cu_model": "gemma4:12b-it-qat",
-    "model": "deepseek-r1:14b",
-    "deep_model": "deepseek-r1:14b"
+    "tool_model": "qwen2.5:0.5b",
+    "cu_model": "qwen2.5:0.5b",
+    "model": "qwen2.5:0.5b",
+    "deep_model": "SparkLLM/Spark-X2.6-1.7B:latest"
   },
   "brain.providers.grok": {
     "tool_model": "grok-4.6",
@@ -133,8 +133,8 @@
     "base_url": "http://localhost:8765"
   },
   "brain.providers.local-openai": {
-    "base_url": "http://127.0.0.1:8080",
-    "model": "gemma-4-12b-it-qat-q4_0"
+    "base_url": "http://127.0.0.1:11434/v1",
+    "model": "qwen2.5:0.5b"
   },
   "brain.providers.vertex": {
     "tool_model": "gemini-3.7-flash",
@@ -143,8 +143,8 @@
   "live": {
     "model": "gpt-live-1",
     "voice": "gleam",
-    "backend_model": "gpt-6-luna",
-    "reasoning_effort": "medium",
+    "backend_model": "gpt-6-astra-pro",
+    "reasoning_effort": "none",
     "web_search": true,
     "instructions": "",
     "backend_instructions": "",
