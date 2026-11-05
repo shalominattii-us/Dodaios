@@ -21,7 +21,7 @@ from fastapi import HTTPException, Request, status
 from dodaios.core import control_key as ck
 
 from .missions_auth import validate_token
-from .surface_security import COOKIE_NAME, open_access_granted
+from .surface_security import COOKIE_NAME, open_access_granted, relay_forwarded
 
 _LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 _UNAUTHORIZED = {
@@ -50,11 +50,27 @@ def person_at_window(request: Request) -> bool:
     in-process app command the brain made, and a local process presenting no
     credential at all are not the person.
 
+    A relayed request is never the person at this window. When a forwarding
+    intermediary stamped the request (the CDN edge in front of the host, a
+    reverse proxy, a tunnel agent — see ``surface_security.relay_forwarded``),
+    the answer is no before any credential is inspected. A session cookie
+    proves *who* signed in; it does not prove they are standing at this
+    machine, and administration is the one class of decision that must not be
+    approvable from the far side of the edge. The cheapest correct reading of
+    that: reachable remotely, yes; administrable remotely, no. The remote
+    caller can still do everything an agent can do — including asking for the
+    approval — it just cannot *be* the approval.
+
     Honest limit: ``Sec-Fetch-Site`` is a "forbidden header" for page scripts,
     so a page cannot fake it, but a local process that deliberately forges it
-    is indistinguishable from the WebView. This tells a person from an agent
-    that follows its instructions; it is not a boundary against malware.
+    is indistinguishable from the WebView. A headerless L4 relay is likewise
+    invisible here. This tells a person from an agent that follows its
+    instructions; it is not a boundary against malware, and the missing
+    header-stamping case is why hosting Jarvis in the cloud (ADR-0045) is the
+    durable answer rather than trusting this seam forever.
     """
+    if relay_forwarded(request.scope):
+        return False
     if validate_token(request.cookies.get(COOKIE_NAME, "")):
         return True
     if _bearer_token(request) is not None:
