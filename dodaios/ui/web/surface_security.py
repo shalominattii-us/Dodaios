@@ -486,11 +486,33 @@ _RELAY_INDICATOR_HEADERS = (
 )
 
 
-def _relay_indicator_present(scope: Scope) -> bool:
+def relay_forwarded(scope: Scope) -> bool:
+    """True when a forwarding intermediary stamped this request.
+
+    Proof that the peer socket that reached Jarvis is a relay, not the local
+    user's own client: the CDN edge in front of the host, a reverse proxy, or
+    a tunnel agent all add one of :data:`_RELAY_INDICATOR_HEADERS`.
+
+    Transport decisions here — open local access, the browser lock — read this.
+    So does the administration seam: a route-level gate that asks "is this the
+    person at the window?" must answer no for a relayed request whatever
+    credential it carries, because a session cookie proves *who* signed in, not
+    that they are standing at this machine. That is what keeps administration
+    from being approved from the far side of the edge.
+
+    Honest limitation, unchanged: a raw L4 relay that adds no header
+    (``ssh -L``, ``socat``) is invisible at this layer, which is exactly why the
+    bind address and the host itself are not the boundary.
+    """
     for name in _RELAY_INDICATOR_HEADERS:
         if _headers(scope, name):
             return True
     return False
+
+
+def _relay_indicator_present(scope: Scope) -> bool:
+    """Internal spelling kept for the guard's own transport decisions."""
+    return relay_forwarded(scope)
 
 
 def foreign_site_initiated(scope: Scope) -> bool:
@@ -1299,6 +1321,7 @@ __all__ = [
     "is_secure_or_loopback",
     "open_access_granted",
     "reject_host",
+    "relay_forwarded",
     "reject_origin",
     "reject_unauthorized",
     "reset_browser_login_required",
